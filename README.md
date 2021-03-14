@@ -1,4 +1,5 @@
 **job4j_Pooh JMS**
+[![Build Status](https://travis-ci.org/amasterenko/job4j_pooh.svg?branch=master)](https://travis-ci.org/amasterenko/job4j_pooh)
 
 The application is an analog of asynchronous queue.
 Clients can be of two types: senders (publishers) and recipients (subscribers).
