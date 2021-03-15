@@ -10,10 +10,18 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
+/**
+ *The PoohServer class implements socket server processing http-like messages.
+ *It uses ExecutorService to manage client connections in multithreading mode.
+ *@author AndrewMs
+ *@version 1.0
+ */
 public class PoohServer {
     private final HashMap<String, Service> modes = new HashMap<>();
 
+    /**
+     * Starts the server in which threads in a thread pool service incoming requests.
+     */
     public void start() {
         modes.put("queue", new QueueService());
         modes.put("topic", new TopicService());

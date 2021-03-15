@@ -1,21 +1,21 @@
 **job4j_Pooh JMS**
 [![Build Status](https://travis-ci.org/amasterenko/job4j_pooh.svg?branch=master)](https://travis-ci.org/amasterenko/job4j_pooh)
 
-The application is an analog of asynchronous queue.
+The application provides an example of an asynchronous message queue.
 
-It uses http and has two modes, "queue" and "topic".
+It uses a http-like protocol to receive and send messages and has two modes: "queue" and "topic".
 
-Clients can be of two types: senders (publishers) and recipients (subscribers).
+Clients can be senders (publishers) or recipients (subscribers).
 
 _1. Queue mode_
 
-Sender sends a message with the queue's name and a text.
+The Sender sends a message with the queue's name and a text.
 
-Recipient reads the first message in the queue and deletes it.
+The Recipient reads the first message in the queue and deletes it.
 
-All the recipients reads only one unique queue.
+All the recipients read only one unique queue.
 
-Request examples (for curl):
+Examples (curl):
 
 POST /queue/weather -d "temperature=18"
 
@@ -39,17 +39,17 @@ temperature=18
 
 _2. Topic mode_
 
-Publisher sends a message with the topic name and a text. 
+The Publisher sends a message with the topic name and a text. 
 
-Subscriber reads the first message in the queue and deletes it.
+The Subscriber reads the first message in the queue and deletes it.
 
 There is a unique queue for each subscriber of the topic.
 
-New topic can be created by a publisher sending POST request with the topic's name.
+A new topic can be created by a publisher sending a POST request with the topic's name.
 
 To subscribe to a topic client sends a GET request with the topic's name.
 
-Request examples (for curl):
+Examples (curl):
 
 POST /topic/weather -d "temperature=18"
 

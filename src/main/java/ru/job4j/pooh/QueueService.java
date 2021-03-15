@@ -2,12 +2,18 @@ package ru.job4j.pooh;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-
+/**
+ * Serves queue-mode requests.
+ *@author AndrewMs
+ *@version 1.0
+ */
 public class QueueService implements Service {
     private final ConcurrentHashMap<String, ConcurrentLinkedQueue<String>> queues = new ConcurrentHashMap<>();
 
     /**
-     * Process a consumer's request and return a response object.
+     * Processes queue-mode request and returns a response object.
+     * For creating a new queue the publisher must send a POST request with the queue's name parameter.
+     *
      * Response codes:
      * 200 - POST/GET request processed correctly
      * 400 - incorrect POST/GET request
@@ -16,26 +22,21 @@ public class QueueService implements Service {
      */
     @Override
     public Resp process(Req req) {
-        try {
-            String command = req.method().split(" ")[0];
-            String queueName = req.method().split(" ")[1].split("/")[2];
-            if ("GET".equals(command)) {
-                String text = queues.getOrDefault(queueName, emptyQueue()).poll();
-                return new Resp(text, 200);
-            }
-            if ("POST".equals(command)) {
-                /* add a queue if empty */
-                queues.putIfAbsent(queueName, new ConcurrentLinkedQueue<>());
-                /* put a text into the queue*/
-                queues.get(queueName).add(req.text());
-                return new Resp(null, 200);
-            }
-        } catch (IndexOutOfBoundsException ignored) {
-
+        if ("GET".equals(req.method())) {
+            String text = queues.getOrDefault(req.destination(), emptyQueue()).poll();
+            return new Resp(text, 200);
+        }
+        if ("POST".equals(req.method())) {
+            queues.putIfAbsent(req.destination(), new ConcurrentLinkedQueue<>());
+            queues.get(req.destination()).add(req.text());
+            return new Resp(null, 200);
         }
         return new Resp(null, 400);
     }
 
+    /**
+     * @return stub queue
+     */
     private ConcurrentLinkedQueue<String> emptyQueue() {
         return new ConcurrentLinkedQueue<>();
     }
