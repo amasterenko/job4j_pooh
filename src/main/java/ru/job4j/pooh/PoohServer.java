@@ -20,7 +20,7 @@ public class PoohServer {
     private final HashMap<String, Service> modes = new HashMap<>();
 
     /**
-     * Starts the server in which threads in a thread pool service incoming requests.
+     * Launches a server where threads in the thread pool serve incoming requests
      */
     public void start() {
         modes.put("queue", new QueueService());
