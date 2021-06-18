@@ -1,64 +1,68 @@
 package ru.job4j.pooh;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * Serves topic-mode requests.
+ * The class handles topic-mode requests.
  *@author AndrewMs
  *@version 1.0
  */
 public class TopicService implements Service {
-    private final ConcurrentHashMap<String, ConcurrentHashMap<String, ConcurrentLinkedQueue<String>>> topics
-            = new ConcurrentHashMap<>();
+    private final static Map<String, Map<String, ConcurrentLinkedQueue<String>>> TOPICS = new ConcurrentHashMap<>();
+    private final int numOfSubscribers;
+
+    public TopicService(int numOfSubscribers) {
+        this.numOfSubscribers = numOfSubscribers;
+    }
 
     /**
-     * Processes topic-mode request and returns a response object.
+     * Handles topic-mode request and returns a response object.
      * For creating a new topic the publisher must send a POST request with the topic's name parameter.
-     * For subscribing to a topic the subscriber must send a GET request with the topic's name and clientId parameters.
+     * The service create a separate queue with the topic's messages for each subscriber.
+     * Maximum number of subscribers is set by the
      *
      * Response codes:
-     * 200 - POST/GET request processed correctly
-     * 201 - POST topic request/GET topic subscription request processed correctly
-     * 400 - POST/GET request has incorrect format
-     * @param req Req - request object
-     * @return Resp - response object
+     * 200 - POST/GET request has been processed correctly.
+     * 400 - POST/GET request has incorrect format.
+     * 404 - no results found.
+     * @param req Req - request object.
+     * @return Resp - response object.
      */
     @Override
     public Resp process(Req req) {
         if ("GET".equals(req.method())) {
-            var subscriberQueue = topics
-                    .getOrDefault(req.destination(), emptyMap())
-                    .putIfAbsent(req.clientId(), new ConcurrentLinkedQueue<>());
-            if (subscriberQueue == null) {
-                return new Resp(null, 201);
+            var topic = TOPICS.get(req.destination());
+            if (topic == null || topic.get(req.clientId()) == null) {
+                return new Resp("", "404 Not Found");
             }
-            String text = topics
-                    .getOrDefault(req.destination(), emptyMap())
-                    .getOrDefault(req.clientId(), emptyQueue())
-                    .poll();
-            return new Resp(text, 200);
+            String text = topic.get(req.clientId()).poll();
+            return new Resp(text, "200 OK");
         }
         if ("POST".equals(req.method())) {
-            var topicMap = topics.putIfAbsent(req.destination(), new ConcurrentHashMap<>());
-            if (topicMap == null) {
-                return new Resp(null, 201);
+            if (TOPICS.get(req.destination()) == null) {
+                Map<String, ConcurrentLinkedQueue<String>> map = new ConcurrentHashMap<>();
+                for (int i = 1; i <= numOfSubscribers; i++) {
+                    map.put(String.valueOf(i), new ConcurrentLinkedQueue<>());
+                }
+                TOPICS.put(req.destination(), map);
             }
-            topics.get(req.destination()).values().forEach(q -> q.add(req.text()));
-            return new Resp(null, 200);
+            TOPICS.get(req.destination()).values().forEach(q -> q.add(req.text()));
+            return new Resp("", "200 OK");
         }
-        return new Resp(null, 400);
+        return new Resp("", "400 Bad Request");
     }
 
     /**
-     * @return stub map
+     * @return stub map.
      */
     private ConcurrentHashMap<String, ConcurrentLinkedQueue<String>> emptyMap() {
         return new ConcurrentHashMap<>();
     }
 
     /**
-     * @return stub queue
+     * @return stub queue.
      */
     private ConcurrentLinkedQueue<String> emptyQueue() {
         return new ConcurrentLinkedQueue<>();

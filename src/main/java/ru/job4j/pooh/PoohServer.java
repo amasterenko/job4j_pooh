@@ -1,34 +1,35 @@
 package ru.job4j.pooh;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 /**
- *The PoohServer class implements socket server processing http-like messages.
- *It uses ExecutorService to manage client connections in multithreading mode.
+ *The PoohServer class implements socket server and handles http-like messages.
+ *It has ExecutorService to manage client connections in multithreading mode.
  *@author AndrewMs
  *@version 1.0
  */
 public class PoohServer {
-    private final HashMap<String, Service> modes = new HashMap<>();
+    private static final HashMap<String, Service> MODES = new HashMap<>();
 
     /**
-     * Launches a server where threads in the thread pool serve incoming requests
+     * Gets properties from Config, creates ExecutorService, launches multithreading Socket Server.
      */
-    public void start() {
-        modes.put("queue", new QueueService());
-        modes.put("topic", new TopicService());
-        ExecutorService pool = Executors.newFixedThreadPool(
-                Runtime.getRuntime().availableProcessors()
-        );
-        try (ServerSocket server = new ServerSocket(9000)) {
+    public static void main(String[] args) {
+        Config cfg = new Config("app.properties");
+
+        MODES.put("queue", new QueueService());
+        MODES.put("topic", new TopicService(cfg.getConfig().get("topicSubscrAmount")));
+
+        ExecutorService pool = Executors.newFixedThreadPool(cfg.getConfig().get("threadPoolSize"));
+        try (ServerSocket server = new ServerSocket(cfg.getConfig().get("serverPort"))) {
+            System.out.println("Server has been started..");
             while (!server.isClosed()) {
                 Socket socket = server.accept();
                 pool.execute(() -> {
@@ -38,9 +39,9 @@ public class PoohServer {
                         var total = input.read(buff);
                         var text = new String(Arrays.copyOfRange(buff, 0, total), StandardCharsets.UTF_8);
                         var req = Req.of(text);
-                        var resp = modes.get(req.mode()).process(req);
-                        out.write(("HTTP/1.1 " + resp.status() + " OK\r\n").getBytes());
-                        out.write(resp.text().getBytes());
+                        var resp = MODES.get(req.mode()).process(req);
+                        out.write(("HTTP/1.1 " + resp.status() + "\r\n").getBytes());
+                        out.write((resp.text() + "\r\n").getBytes());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -49,9 +50,5 @@ public class PoohServer {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public static void main(String[] args) {
-        new PoohServer().start();
     }
 }

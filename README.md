@@ -1,74 +1,73 @@
-**job4j_Pooh JMS**
+## Pooh JMS  
 [![Build Status](https://travis-ci.org/amasterenko/job4j_pooh.svg?branch=master)](https://travis-ci.org/amasterenko/job4j_pooh)
+___    
+The application provides an example of an asynchronous message queue.  
 
-The application provides an example of an asynchronous message queue.
+### Technologies  
+* Java (sockets, Concurrent)
 
-It uses a http-like protocol to receive and send messages and has two modes: "queue" and "topic".
+### Description  
+The app has _queue_ and _topic_ modes and uses http-like messaging protocol.      
+Clients can be either publishers or subscribers.   
 
-Clients can be senders (publishers) or recipients (subscribers).
+_Queue mode:_  
 
-_1. Queue mode_
+Publisher sends a message with the queue's name and a text.  
+The service has a single queue for all the recipients.    
+Subscriber reads the first message in the queue and deletes it.  
 
-The Sender sends a message with the queue's name and a text.
+_Topic mode:_  
 
-The Recipient reads the first message in the queue and deletes it.
+Publisher sends a message with the topic name and a text.  
+The service has unique queue for each subscriber of the topic (up to 10 queues by default).  
+Subscriber reads the first message in their queue and deletes the message.
 
-All the recipients read only one unique queue.
+### Install  
 
-Examples (curl):
+Build the project with Maven: ```mvn clean package```.    
+Run the app: ```java -jar target/job4j_pooh.jar```.  
+Server default URL: http://localhost:9000    
 
-POST /queue/weather -d "temperature=18"
+### Usage  
+Queue-mode POST:  
+```
+curl -i -X POST -d "temperature=18" http://localhost:9000/queue/weather       
+```
+_queue_ - mode,  
+_weather_ - unique name of the queue,  
+_"temperature=18"_ - text message.  
 
-queue - mode,
+Queue-mode GET:  
+```
+curl -i http://localhost:9000/queue/weather       
+```
+_queue_ - mode,  
+_weather_ - unique name of the queue.  
 
-weather - unique name of the queue,
-
-"temperature=18" - text.
-
-GET /queue/weather
-
-queue - mode,
-
-weather - unique name of the queue,
-
-response:
-
+Response:
+```
 HTTP/1.1 200 OK
-
 temperature=18
+```
+Topic-mode POST:
+```
+curl -i -X POST -d "temperature=23" http://localhost:9000/topic/weather       
+```
+_topic_ - mode,  
+_weather_ - unique name of the topic,  
+"temperature=18" - text message.  
 
-_2. Topic mode_
+Topic-mode GET:
+```
+curl -i http://localhost:9000/topic/weather/3       
+```
+_topic_ - mode,  
+_weather_ - unique name of the topic,  
+_3_ - subscriber's ID.    
 
-The Publisher sends a message with the topic name and a text. 
+Response:
+```
+HTTP/1.1 200 OK  
+temperature=23  
+```
 
-The Subscriber reads the first message in the queue and deletes it.
-
-There is a unique queue for each subscriber of the topic.
-
-A new topic can be created by a publisher sending a POST request with the topic's name.
-
-To subscribe to a topic client sends a GET request with the topic's name.
-
-Examples (curl):
-
-POST /topic/weather -d "temperature=18"
-
-topic - mode,
-
-weather - unique name of the topic,
-
-"temperature=18" - text.
-
-GET /topic/weather/1
-
-topic - mode,
-
-weather - unique name of the topic,
-
-1 - subscriber's ID.
-
-response:
-
-HTTP/1.1 200 OK
-
-temperature=18

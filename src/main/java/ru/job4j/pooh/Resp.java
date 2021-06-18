@@ -1,15 +1,15 @@
 package ru.job4j.pooh;
 
 /**
- *The Resp class stores response parameters and provides methods for accessing them
+ *The Resp class stores response parameters and provides methods to access them.
  *@author AndrewMs
  *@version 1.0
  */
 public class Resp {
     private final String text;
-    private final int status;
+    private final String status;
 
-    public Resp(String text, int status) {
+    public Resp(String text, String status) {
         this.text = text;
         this.status = status;
     }
@@ -24,7 +24,7 @@ public class Resp {
     /**
      * @return status code for a response's header
      */
-    public int status() {
+    public String status() {
         return status;
     }
 }

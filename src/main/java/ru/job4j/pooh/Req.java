@@ -2,7 +2,7 @@ package ru.job4j.pooh;
 
 import java.util.Scanner;
 /**
- *The Req class parses and stores request parameters and provides methods for accessing them
+ *The Req class parses and stores request parameters and provides methods to access them.
  *@author AndrewMs
  *@version 1.0
  */
