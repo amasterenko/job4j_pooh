@@ -1,10 +1,10 @@
 ## Pooh JMS  
 [![Build Status](https://travis-ci.org/amasterenko/job4j_pooh.svg?branch=master)](https://travis-ci.org/amasterenko/job4j_pooh)
-___    
+  
 The application provides an example of an asynchronous message queue.  
 
 ### Technologies  
-* Java (sockets, Concurrent)
+* Java Core
 
 ### Description  
 The app has _queue_ and _topic_ modes and uses http-like messaging protocol.      
