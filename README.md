@@ -12,7 +12,7 @@ Clients can be either publishers or subscribers.
 
 _Queue mode:_  
 
-Publisher sends a message with the queue's name and a text.  
+Publisher sends a message with the queue name and a text.  
 The service has a single queue for all the recipients.    
 Subscriber reads the first message in the queue and deletes it.  
 
